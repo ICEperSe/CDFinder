@@ -2,6 +2,7 @@ Command line change_directory_finder -> cd.finder
 
 Should:
 1) Throw on empty input
+------------------------
 2) If it s the current dir return path to current dir
 3) Retrun actual, full path to target dir, on simple dir name
 4) Return input path on full path
