@@ -32,5 +32,16 @@ namespace ComLineCDWithFinder
         {
             cdFinder.GetPathTo(curDirectory.Name).Should().Be(curDirectory.Name);
         }
+
+//        [TestCase(@"Kontur", 
+//            ExpectedResult = @"C:\Users\ASUS\Desktop\Kontur",
+//            TestName = "Path to Kontur Test")]
+        [TestCase(@"xampp", 
+            ExpectedResult = @"C:\xampp",
+            TestName = "Path to xampp Test")]
+        public string ReturnFullPathToDir_OnFolderInCurDir(string dirName)
+        {
+            return cdFinder.GetPathTo(dirName);
+        }
     }
 }
