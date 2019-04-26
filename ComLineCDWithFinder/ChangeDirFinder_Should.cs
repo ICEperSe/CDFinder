@@ -94,5 +94,11 @@ namespace ComLineCDWithFinder
             var target = SubDirectories[1].GetDirectories().First();
             _cdFinder.GetPathTo(target.Name).Should().Be(target.FullName);
         }
+
+        [Test]
+        public void ReturnNull_IfDirNotExists()
+        {
+            _cdFinder.GetPathTo("iDontExist").Should().BeNullOrEmpty();
+        }
     }
 }

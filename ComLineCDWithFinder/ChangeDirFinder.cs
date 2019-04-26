@@ -26,10 +26,7 @@ namespace ComLineCDWithFinder
                 throw new ArgumentException(nameof(targetDir));
             if(targetDir == CurrentDirectory.Name)
                 return CurrentDirectory.FullName;
-            var res = CurrentDirectory
-                .GetDirectories()
-                .FirstOrDefault(d => d.Name == targetDir);
-            return res == null ? Find(CurrentDirectory, targetDir).FullName : res.FullName;
+            return Find(CurrentDirectory, targetDir)?.FullName;
         }
 
         private DirectoryInfo Find(DirectoryInfo parent, string dirName)
@@ -38,7 +35,7 @@ namespace ComLineCDWithFinder
             {
                 if (subDir.Name == dirName) return subDir;
             }
-            foreach (var subDir in CurrentDirectory.GetDirectories())
+            foreach (var subDir in parent.GetDirectories())
             {
                 var res = Find(subDir, dirName);
                 if (res != null) return res;
