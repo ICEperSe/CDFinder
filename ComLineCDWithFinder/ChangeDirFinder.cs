@@ -13,7 +13,7 @@ namespace ComLineCDWithFinder
     {
         public DirectoryInfo CurrentDirectory;
 
-        private static readonly char[] InvalidSymbols = new[] {'%', '*', '|', '<', '>', '$'};
+        private static readonly char[] InvalidSymbols = new[] {'%', '|', '<', '>', '$'};
 
         public ChangeDirFinder(string curDir)
         {
@@ -29,12 +29,20 @@ namespace ComLineCDWithFinder
             var res = CurrentDirectory
                 .GetDirectories()
                 .FirstOrDefault(d => d.Name == targetDir);
-            return res?.FullName;
+            return res == null ? Find(CurrentDirectory, targetDir).FullName : res.FullName;
         }
 
-        private DirectoryInfo Find(string dirName)
+        private DirectoryInfo Find(DirectoryInfo parent, string dirName)
         {
-
+            foreach (var subDir in parent.GetDirectories())
+            {
+                if (subDir.Name == dirName) return subDir;
+            }
+            foreach (var subDir in CurrentDirectory.GetDirectories())
+            {
+                var res = Find(subDir, dirName);
+                if (res != null) return res;
+            }
             return null;
         }
     }

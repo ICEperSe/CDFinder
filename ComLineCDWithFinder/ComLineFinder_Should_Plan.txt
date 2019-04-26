@@ -5,13 +5,15 @@ path -> full Path
 Should:
 1) Throw on empty input
 2) If it s the current dir return path to current dir
+3) Return path to subdir
 ------------------------
-3) Return path to subdir in current dir
 4) Return path to dir in subdir
+5) Return null if no dir exists from cur dir
 
+6) Return first dir with target name
+5) Return input path on full path
 
-4) Return input path on full path
-5) Throw on wrong symbols: '%', '|', '<', '>', '$'
-6) Quotes over input, if there are spaces in names
-7) multiple dirs
-8) flags
+6) Throw on wrong symbols: '%', '|', '<', '>', '$'
+7) Quotes over input, if there are spaces in names
+8) multiple dirs
+9) flags

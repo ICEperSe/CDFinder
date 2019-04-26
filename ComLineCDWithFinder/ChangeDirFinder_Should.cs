@@ -15,40 +15,52 @@ namespace ComLineCDWithFinder
         private ChangeDirFinder _cdFinder;
         private DirectoryInfo _curDirectory;
         private List<DirectoryInfo> SubDirectories { get; } = new List<DirectoryInfo>();
+        private static Random _random;
+
+        [OneTimeSetUp]
+        public void StartSetUp()
+        {
+            _random = new Random();
+            _curDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
+            SubDirectories.AddRange(CreateSubDirs(_curDirectory, 2,2));
+        }
 
         [SetUp]
         public void SetUp()
         {
-            _curDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
-
-            SubDirectories.AddRange(CreateSubDirs(_curDirectory, 1));
-
             _cdFinder = new ChangeDirFinder(_curDirectory.FullName);
         }
 
-        private IEnumerable<DirectoryInfo> CreateSubDirs(DirectoryInfo parent,int nestingLvl)
+        private static IEnumerable<DirectoryInfo> CreateSubDirs(
+            DirectoryInfo parent,
+            int count, 
+            int nestingLvl)
         {
             var dirs = new List<DirectoryInfo>();
-            while (nestingLvl-- > 0)
-            {
+            if (nestingLvl <= 0) return dirs.ToArray();
+            var i = count;
+            while (i-->0)
                 dirs.Add(parent.CreateSubdirectory(GetNameForSubDir(parent)));
+            var nest = new List<DirectoryInfo>();
+            foreach (var dir in dirs)
+            {
+                nest.AddRange(CreateSubDirs(dir, count, nestingLvl - 1));
             }
 
-            return dirs.ToArray();
+            return dirs.Concat(nest).ToArray();
         }
 
         private static string GetNameForSubDir(DirectoryInfo parent)
         {
-            var rand = new Random();
-            var strB = new StringBuilder("dir" + rand.Next());
+            var strB = new StringBuilder("dir" + _random.Next());
             while (File.Exists(parent.FullName + strB))
             {
-                strB.Append(rand.Next());
+                strB.Append(_random.Next());
             }
             return strB.ToString();
         }
 
-        [TearDown]
+        [OneTimeTearDown]
         public void TearDown()
         {
             foreach (var dir in SubDirectories)
@@ -74,6 +86,13 @@ namespace ComLineCDWithFinder
         public void ReturnPath_OnSubDir()
         {
             _cdFinder.GetPathTo(SubDirectories[0].Name).Should().Be(SubDirectories[0].FullName);
+        }
+
+        [Test]
+        public void ReturnPath_OnDirInSubDir()
+        {
+            var target = SubDirectories[1].GetDirectories().First();
+            _cdFinder.GetPathTo(target.Name).Should().Be(target.FullName);
         }
     }
 }
