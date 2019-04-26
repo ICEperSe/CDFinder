@@ -1,12 +1,17 @@
 Command line change_directory_finder -> cd.finder
+path -> full Path
+
 
 Should:
 1) Throw on empty input
 2) If it s the current dir return path to current dir
 ------------------------
-3) Retrun actual, full path to target dir, on simple dir name
+3) Return path to subdir in current dir
+4) Return path to dir in subdir
+
+
 4) Return input path on full path
-5) Throw on wrong symbols: '%', '*', '|', '<', '>', '$'
+5) Throw on wrong symbols: '%', '|', '<', '>', '$'
 6) Quotes over input, if there are spaces in names
 7) multiple dirs
 8) flags

@@ -25,27 +25,17 @@ namespace ComLineCDWithFinder
             if(targetDir == string.Empty)
                 throw new ArgumentException(nameof(targetDir));
             if(targetDir == CurrentDirectory.Name)
-                return targetDir;
-            return Find(targetDir).FullName;
+                return CurrentDirectory.FullName;
+            var res = CurrentDirectory
+                .GetDirectories()
+                .FirstOrDefault(d => d.Name == targetDir);
+            return res?.FullName;
         }
 
         private DirectoryInfo Find(string dirName)
         {
-            foreach (var drive in DriveInfo.GetDrives())
-            {
-                if (drive.RootDirectory.Name == dirName)
-                    return drive.RootDirectory;
-                var dir = CheckEachDir(drive.RootDirectory, (d) => d.Name == dirName);
-                if (dir != null)
-                    return dir;
-            }
 
             return null;
-        }
-
-        private DirectoryInfo CheckEachDir(DirectoryInfo srcDir, Func<DirectoryInfo, bool> condition)
-        {
-            return srcDir.GetDirectories().FirstOrDefault(condition);
         }
     }
 }

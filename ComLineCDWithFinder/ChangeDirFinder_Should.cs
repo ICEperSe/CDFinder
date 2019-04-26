@@ -12,36 +12,68 @@ namespace ComLineCDWithFinder
     [TestFixture]
     public class ChangeDirFinder_Should
     {
-        private ChangeDirFinder cdFinder;
-        private DirectoryInfo curDirectory;
+        private ChangeDirFinder _cdFinder;
+        private DirectoryInfo _curDirectory;
+        private List<DirectoryInfo> SubDirectories { get; } = new List<DirectoryInfo>();
+
         [SetUp]
         public void SetUp()
         {
-            curDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
-            cdFinder = new ChangeDirFinder(curDirectory.FullName);
+            _curDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
+
+            SubDirectories.AddRange(CreateSubDirs(_curDirectory, 1));
+
+            _cdFinder = new ChangeDirFinder(_curDirectory.FullName);
+        }
+
+        private IEnumerable<DirectoryInfo> CreateSubDirs(DirectoryInfo parent,int nestingLvl)
+        {
+            var dirs = new List<DirectoryInfo>();
+            while (nestingLvl-- > 0)
+            {
+                dirs.Add(parent.CreateSubdirectory(GetNameForSubDir(parent)));
+            }
+
+            return dirs.ToArray();
+        }
+
+        private static string GetNameForSubDir(DirectoryInfo parent)
+        {
+            var rand = new Random();
+            var strB = new StringBuilder("dir" + rand.Next());
+            while (File.Exists(parent.FullName + strB))
+            {
+                strB.Append(rand.Next());
+            }
+            return strB.ToString();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            foreach (var dir in SubDirectories)
+            {
+                if(dir.Exists) dir.Delete(true);
+            }
+            SubDirectories.Clear();
         }
 
         [TestCase("")]
         public void Throw_OnEmptyInput(string path)
         {
-            Assert.Throws<ArgumentException>(()=>cdFinder.GetPathTo(path));
+            Assert.Throws<ArgumentException>(()=>_cdFinder.GetPathTo(path));
         }
 
         [Test]
         public void ReturnCurDir_OnCurDirInput()
         {
-            cdFinder.GetPathTo(curDirectory.Name).Should().Be(curDirectory.Name);
+            _cdFinder.GetPathTo(_curDirectory.Name).Should().Be(_curDirectory.FullName);
         }
 
-//        [TestCase(@"Kontur", 
-//            ExpectedResult = @"C:\Users\ASUS\Desktop\Kontur",
-//            TestName = "Path to Kontur Test")]
-        [TestCase(@"xampp", 
-            ExpectedResult = @"C:\xampp",
-            TestName = "Path to xampp Test")]
-        public string ReturnFullPathToDir_OnFolderInCurDir(string dirName)
+        [Test]
+        public void ReturnPath_OnSubDir()
         {
-            return cdFinder.GetPathTo(dirName);
+            _cdFinder.GetPathTo(SubDirectories[0].Name).Should().Be(SubDirectories[0].FullName);
         }
     }
 }
