@@ -9,29 +9,24 @@ using System.Threading.Tasks;
 
 namespace ComLineCDWithFinder
 {
-    public class PathFinder
+    public static class PathFinder
     {
-        public DirectoryInfo CurrentDirectory;
 
         private static readonly char[] InvalidSymbols = new[] {'%', '|', '<', '>', '$'};
 
-        public PathFinder(string curDir)
+        public static string[] GetPathTo(string curDir, string targetDir)
         {
-            CurrentDirectory = new DirectoryInfo(curDir);
-        }
-
-        public string[] GetPathTo(string targetDir)
-        {
+            var currentDirectory = new DirectoryInfo(curDir);
             if(targetDir == string.Empty || targetDir.IndexOfAny(InvalidSymbols) != -1)
                 throw new ArgumentException(nameof(targetDir));
-            if(targetDir == CurrentDirectory.Name)
-                return new []{CurrentDirectory.FullName};
+            if(targetDir == currentDirectory.Name)
+                return new []{currentDirectory.FullName};
             if (Path.IsPathRooted(targetDir) && Directory.Exists(targetDir)) 
                 return new []{targetDir};
-            return Find(CurrentDirectory, targetDir).Select(d=>d.FullName).ToArray();
+            return Find(currentDirectory, targetDir).Select(d=>d.FullName).ToArray();
         }
 
-        private IEnumerable<DirectoryInfo> Find(DirectoryInfo parent, string dirName)
+        private static IEnumerable<DirectoryInfo> Find(DirectoryInfo parent, string dirName)
         {
             var subDirs = parent.GetDirectories();
             var dirs = new List<DirectoryInfo>();
