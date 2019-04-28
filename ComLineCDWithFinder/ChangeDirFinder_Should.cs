@@ -14,7 +14,6 @@ namespace ComLineCDWithFinder
     {
         private ChangeDirFinder _cdFinder;
         private DirectoryInfo _curDirectory;
-        private List<DirectoryInfo> SubDirectories { get; } = new List<DirectoryInfo>();
         private static Random _random;
 
         [OneTimeSetUp]
@@ -22,7 +21,7 @@ namespace ComLineCDWithFinder
         {
             _random = new Random();
             _curDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
-            SubDirectories.AddRange(CreateSubDirs(_curDirectory, 2,2));
+            CreateSubDirs(_curDirectory, 2,2);
         }
 
         [SetUp]
@@ -47,7 +46,21 @@ namespace ComLineCDWithFinder
                 nest.AddRange(CreateSubDirs(dir, count, nestingLvl - 1));
             }
 
-            return dirs.Concat(nest).ToArray();
+            return dirs.Concat(nest);
+        }
+
+
+        private static IEnumerable<DirectoryInfo> CreateSubDirsWithOneName(
+            DirectoryInfo parent,
+            int nestingLvl,
+            string name)
+        {
+            var dirs = new List<DirectoryInfo>();
+            if (nestingLvl <= 0) return dirs;
+            var subDir = parent.CreateSubdirectory(name);
+            dirs.Add(subDir);
+            dirs.AddRange(CreateSubDirsWithOneName(subDir, nestingLvl - 1,name));
+            return dirs;
         }
 
         private static string GetNameForSubDir(DirectoryInfo parent)
@@ -60,16 +73,6 @@ namespace ComLineCDWithFinder
             return strB.ToString();
         }
 
-        [OneTimeTearDown]
-        public void TearDown()
-        {
-            foreach (var dir in SubDirectories)
-            {
-                if(dir.Exists) dir.Delete(true);
-            }
-            SubDirectories.Clear();
-        }
-
         [TestCase("")]
         public void Throw_OnEmptyInput(string path)
         {
@@ -79,24 +82,26 @@ namespace ComLineCDWithFinder
         [Test]
         public void ReturnCurDir_OnCurDirInput()
         {
-            _cdFinder.GetPathTo(_curDirectory.Name).Should().Be(_curDirectory.FullName);
+            _cdFinder.GetPathTo(_curDirectory.Name)[0].Should().Be(_curDirectory.FullName);
         }
 
         [Test]
         public void ReturnPath_OnSubDir()
         {
-            _cdFinder.GetPathTo(SubDirectories[0].Name).Should().Be(SubDirectories[0].FullName);
+            var dirs = _curDirectory.GetDirectories();
+            _cdFinder.GetPathTo(dirs[0].Name)[0].Should().Be(dirs[0].FullName);
         }
 
         [Test]
         public void ReturnPath_OnDirInSubDir()
         {
-            var target = SubDirectories[1].GetDirectories().First();
-            _cdFinder.GetPathTo(target.Name).Should().Be(target.FullName);
+            var dirs = _curDirectory.GetDirectories();
+            var target = dirs[1].GetDirectories().First();
+            _cdFinder.GetPathTo(target.Name)[0].Should().Be(target.FullName);
         }
 
         [Test]
-        public void ReturnNull_IfDirNotExists()
+        public void ReturnEmpty_IfDirNotExists()
         {
             _cdFinder.GetPathTo("iDontExist").Should().BeNullOrEmpty();
         }
@@ -107,7 +112,18 @@ namespace ComLineCDWithFinder
                   ExpectedResult = @"C:\Users\ASUS\Desktop\Prog")]
         public string ReturnPath_OnFullPath(string path)
         {
-            return _cdFinder.GetPathTo(path);
+            return _cdFinder.GetPathTo(path)[0];
+        }
+
+        [Test]
+        public void ReturnCollection_OnDirInput_IfThereAreSeveralDirs()
+        {
+            var dirs = CreateSubDirsWithOneName(_curDirectory,
+                4,
+                "oneName");
+            _cdFinder.GetPathTo("oneName")
+                .Should()
+                .BeEquivalentTo(dirs.Select(d=>d.FullName));
         }
     }
 }

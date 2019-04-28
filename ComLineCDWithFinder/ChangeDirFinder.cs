@@ -20,28 +20,28 @@ namespace ComLineCDWithFinder
             CurrentDirectory = new DirectoryInfo(curDir);
         }
 
-        public string GetPathTo(string targetDir)
+        public string[] GetPathTo(string targetDir)
         {
             if(targetDir == string.Empty)
                 throw new ArgumentException(nameof(targetDir));
             if(targetDir == CurrentDirectory.Name)
-                return CurrentDirectory.FullName;
-            if (Path.IsPathRooted(targetDir) && Directory.Exists(targetDir)) return targetDir;
-            return Find(CurrentDirectory, targetDir)?.FullName;
+                return new []{CurrentDirectory.FullName};
+            if (Path.IsPathRooted(targetDir) && Directory.Exists(targetDir)) 
+                return new []{targetDir};
+            return Find(CurrentDirectory, targetDir).Select(d=>d.FullName).ToArray();
         }
 
-        private DirectoryInfo Find(DirectoryInfo parent, string dirName)
+        private IEnumerable<DirectoryInfo> Find(DirectoryInfo parent, string dirName)
         {
-            foreach (var subDir in parent.GetDirectories())
+            var subDirs = parent.GetDirectories();
+            var dirs = new List<DirectoryInfo>();
+            var target = subDirs.FirstOrDefault(d => d.Name == dirName);
+            if (target != null) dirs.Add(target);
+            foreach (var subDir in subDirs)
             {
-                if (subDir.Name == dirName) return subDir;
+                dirs.AddRange(Find(subDir, dirName));
             }
-            foreach (var subDir in parent.GetDirectories())
-            {
-                var res = Find(subDir, dirName);
-                if (res != null) return res;
-            }
-            return null;
+            return dirs;
         }
     }
 }

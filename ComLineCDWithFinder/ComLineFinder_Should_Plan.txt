@@ -9,6 +9,7 @@ Should:
 4) Return path to dir in subdir
 5) Return null if no dir exists from cur dir
 6) Return input path on full path
+7) Return several paths if they are exists
 ------------------------
 
 6) Throw on wrong symbols: '%', '|', '<', '>', '$'
