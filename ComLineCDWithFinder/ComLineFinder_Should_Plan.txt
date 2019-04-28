@@ -11,14 +11,12 @@ Should:
 6) Return input path on full path
 7) Return multiple paths if they are exists
 8) Throw on wrong symbols: '%', '|', '<', '>', '$'
-------------------------
 9) Return path to dir on input with format: 
 											"someDir\otherDir"
 											"dir\someDir\otherDir"
 											...
-
-
-9) Quotes over input, if there are spaces in names
+------------------------
 10) flags
+11) Quotes over input, if there are spaces in names
 
-11) Stack Overflow Exception
+12) Stack Overflow Exception

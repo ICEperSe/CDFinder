@@ -69,10 +69,12 @@ namespace ComLineCDWithFinder
             return strB.ToString();
         }
 
-        [TestCase("")]
-        public void Throw_OnEmptyInput(string path)
+        [Test]
+        public void Throw_OnEmptyInput()
         {
-            Assert.Throws<ArgumentException>(()=>PathFinder.GetPathTo(_curDirectory.FullName,path));
+            Assert.Throws<ArgumentException>(()=>
+                PathFinder.GetPathTo(_curDirectory.FullName,string.Empty)
+                );
         }
 
         [Test]
