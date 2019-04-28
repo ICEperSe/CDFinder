@@ -100,5 +100,14 @@ namespace ComLineCDWithFinder
         {
             _cdFinder.GetPathTo("iDontExist").Should().BeNullOrEmpty();
         }
+
+        [TestCase(@"C:\", ExpectedResult = @"C:\")]
+        [TestCase(@"D:\Movies", ExpectedResult = @"D:\Movies")]
+        [TestCase(@"C:\Users\ASUS\Desktop\Prog",
+                  ExpectedResult = @"C:\Users\ASUS\Desktop\Prog")]
+        public string ReturnPath_OnFullPath(string path)
+        {
+            return _cdFinder.GetPathTo(path);
+        }
     }
 }

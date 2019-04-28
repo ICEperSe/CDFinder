@@ -26,6 +26,7 @@ namespace ComLineCDWithFinder
                 throw new ArgumentException(nameof(targetDir));
             if(targetDir == CurrentDirectory.Name)
                 return CurrentDirectory.FullName;
+            if (Path.IsPathRooted(targetDir) && Directory.Exists(targetDir)) return targetDir;
             return Find(CurrentDirectory, targetDir)?.FullName;
         }
 

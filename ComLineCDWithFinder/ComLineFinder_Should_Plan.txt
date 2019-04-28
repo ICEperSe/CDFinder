@@ -6,12 +6,10 @@ Should:
 1) Throw on empty input
 2) If it s the current dir return path to current dir
 3) Return path to subdir
-
 4) Return path to dir in subdir
 5) Return null if no dir exists from cur dir
+6) Return input path on full path
 ------------------------
-6) Return first dir with target name
-5) Return input path on full path
 
 6) Throw on wrong symbols: '%', '|', '<', '>', '$'
 7) Quotes over input, if there are spaces in names
