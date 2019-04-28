@@ -12,7 +12,7 @@ namespace ComLineCDWithFinder
     [TestFixture]
     public class ChangeDirFinder_Should
     {
-        private ChangeDirFinder _cdFinder;
+        private PathFinder _cdFinder;
         private DirectoryInfo _curDirectory;
         private static Random _random;
 
@@ -21,13 +21,13 @@ namespace ComLineCDWithFinder
         {
             _random = new Random();
             _curDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
-            CreateSubDirs(_curDirectory, 2,2);
+            CreateSubDirs(_curDirectory, 2,3);
         }
 
         [SetUp]
         public void SetUp()
         {
-            _cdFinder = new ChangeDirFinder(_curDirectory.FullName);
+            _cdFinder = new PathFinder(_curDirectory.FullName);
         }
 
         private static IEnumerable<DirectoryInfo> CreateSubDirs(
@@ -38,8 +38,11 @@ namespace ComLineCDWithFinder
             var dirs = new List<DirectoryInfo>();
             if (nestingLvl <= 0) return dirs.ToArray();
             var i = count;
-            while (i-->0)
-                dirs.Add(parent.CreateSubdirectory(GetNameForSubDir(parent)));
+            while (i-- > 0)
+            {
+                var name = GetNameForSubDir(parent);
+                dirs.Add(parent.CreateSubdirectory(name));
+            }
             var nest = new List<DirectoryInfo>();
             foreach (var dir in dirs)
             {
@@ -124,6 +127,31 @@ namespace ComLineCDWithFinder
             _cdFinder.GetPathTo("oneName")
                 .Should()
                 .BeEquivalentTo(dirs.Select(d=>d.FullName));
+        }
+
+        [TestCase("namewith |")]
+        [TestCase("namewith %")]
+        [TestCase("namewith <")]
+        [TestCase("namewith >")]
+        [TestCase("namewith $")]
+        public void Throw_OnWrongSymbols(string target)
+        {
+            Assert.Throws<ArgumentException>(() => _cdFinder.GetPathTo(target));
+        }
+
+        [Test]
+        public void ReturnPath_OnPathPartInput()
+        {
+            var dir = _curDirectory.GetDirectories().First();
+            var res = dir.GetDirectories().First();
+            var name = dir.Name + "\\" + res.Name;
+            _cdFinder.GetPathTo(name)[0].Should().Be(res.FullName);
+        }
+
+        //[Test]
+        public void NotThrowStackOverflowException_OnBigNesting()
+        {
+            
         }
     }
 }

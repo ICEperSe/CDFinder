@@ -9,20 +9,20 @@ using System.Threading.Tasks;
 
 namespace ComLineCDWithFinder
 {
-    public class ChangeDirFinder
+    public class PathFinder
     {
         public DirectoryInfo CurrentDirectory;
 
         private static readonly char[] InvalidSymbols = new[] {'%', '|', '<', '>', '$'};
 
-        public ChangeDirFinder(string curDir)
+        public PathFinder(string curDir)
         {
             CurrentDirectory = new DirectoryInfo(curDir);
         }
 
         public string[] GetPathTo(string targetDir)
         {
-            if(targetDir == string.Empty)
+            if(targetDir == string.Empty || targetDir.IndexOfAny(InvalidSymbols) != -1)
                 throw new ArgumentException(nameof(targetDir));
             if(targetDir == CurrentDirectory.Name)
                 return new []{CurrentDirectory.FullName};
@@ -35,7 +35,7 @@ namespace ComLineCDWithFinder
         {
             var subDirs = parent.GetDirectories();
             var dirs = new List<DirectoryInfo>();
-            var target = subDirs.FirstOrDefault(d => d.Name == dirName);
+            var target = subDirs.FirstOrDefault(d => d.FullName.EndsWith(dirName));
             if (target != null) dirs.Add(target);
             foreach (var subDir in subDirs)
             {
