@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ComLineCDWithFinder
 {
-    public static class PathFinder
+    internal static class PathFinder
     {
 
         private static readonly char[] InvalidSymbols = new[] {'%', '|', '<', '>', '$'};
