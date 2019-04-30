@@ -23,11 +23,11 @@ namespace ComLineCDWithFinder
         [DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
 
-        public static void Run(string target)
+        public static void Run(string[] args)
         {
             CheckConsoleState();
             var curDir = Environment.CurrentDirectory;
-            var targetDirs = PathFinder.GetPathTo(curDir, target);
+            var targetDirs = PathFinder.GetPathTo(curDir, args[0]);
             if (targetDirs.Length == 0)
             {
                 Console.WriteLine("There is no such directory");

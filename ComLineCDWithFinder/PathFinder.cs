@@ -15,10 +15,9 @@ namespace ComLineCDWithFinder
         private static readonly char[] InvalidSymbols = new[] {'%', '|', '<', '>', '$'};
         private static readonly char[] Separators = new[] {'\\', '/'};
 
-
-
         public static string[] GetPathTo(string curDir, string targetDir)
         {
+            targetDir = ValidateSeparators(targetDir);
             var currentDirectory = new DirectoryInfo(curDir);
             if(targetDir == string.Empty || targetDir.IndexOfAny(InvalidSymbols) != -1)
                 throw new ArgumentException(nameof(targetDir));
@@ -48,6 +47,13 @@ namespace ComLineCDWithFinder
         {
             var index = path.LastIndexOfAny(Separators);
             return index == -1 ? path : path.Substring(index + 1);
+        }
+
+        private static string ValidateSeparators(string path)
+        {
+            for (int i = 1; i < Separators.Length; i++)
+                path = path.Replace(Separators[i], Separators[0]);
+            return path;
         }
     }
 }

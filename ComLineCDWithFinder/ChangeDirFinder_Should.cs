@@ -134,12 +134,13 @@ namespace ComLineCDWithFinder
             Assert.Throws<ArgumentException>(() => PathFinder.GetPathTo(_curDirectory.FullName,target));
         }
 
-        [Test]
-        public void ReturnPath_OnPathPartInput()
+        [TestCase('\\')]
+        [TestCase('/')]
+        public void ReturnPath_OnPathPartInput(char separator)
         {
             var dir = _curDirectory.GetDirectories().First();
             var res = dir.GetDirectories().First();
-            var name = dir.Name + "\\" + res.Name;
+            var name = dir.Name + separator + res.Name;
             PathFinder.GetPathTo(_curDirectory.FullName, name)[0].Should().Be(res.FullName);
         }
 
