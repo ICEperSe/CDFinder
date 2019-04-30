@@ -10,9 +10,8 @@ using System.Windows.Forms;
 
 namespace ComLineCDWithFinder
 {
-    static class WinCMDShell
+    class WinCMDShell : ICommandShell
     {
-        private static bool IsConsoleFree = false;
 
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool AttachConsole(uint dwProcessId);
@@ -23,73 +22,32 @@ namespace ComLineCDWithFinder
         [DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
 
-        public static void Run(string[] args)
+
+
+        public void Write(string str)
         {
-            CheckConsoleState();
-            var curDir = Environment.CurrentDirectory;
-            var targetDirs = PathFinder.GetPathTo(curDir, args[0]);
-            if (targetDirs.Length == 0)
-            {
-                Console.WriteLine("There is no such directory");
-                return;
-            }
-            if (targetDirs.Length == 1)
-            {
-                WriteResult(targetDirs[0]);
-            }
-            else
-            {
-                if(SelectSingleOption(targetDirs, out var path))
-                    WriteResult(path);
-            }
+            Console.Write(str);
         }
 
-        private static bool SelectSingleOption(IReadOnlyList<string> options, out string path)
+        public string Read()
         {
-            if (options == null) throw new ArgumentNullException(nameof(options));
-            var i = 0;
-            foreach (var dir in options)
-            {
-                Console.WriteLine($"{++i}. {dir}");
-            }
-            Console.Write("Enter number: ");
-            if (int.TryParse(Console.ReadLine(), out var numb) 
-                && numb <= options.Count && numb > 0)
-            {
-                path = options[numb - 1];
-                return true;
-            }
-
-            path = null;
-            return false;
+            return Console.ReadLine();
         }
 
-        private static void WriteResult(string resultPath)
+        public void PutCommandToLine(string command)
         {
-            CheckConsoleState();
             var process = Process.GetProcessesByName("cmd");
             if (process.Length <= 0) return;
             var pId = process[0].Id;
             FreeConsole();
             if (!AttachConsole((uint) pId))
             {
-                Console.WriteLine(Marshal.GetLastWin32Error());
-                return;
+                Write(Marshal.GetLastWin32Error().ToString());
             }
             else
             {
                 SetForegroundWindow(Process.GetCurrentProcess().MainWindowHandle);
-                SendKeys.SendWait("cd " + resultPath);
-            }
-
-            IsConsoleFree = true;
-        }
-
-        private static void CheckConsoleState()
-        {
-            if (IsConsoleFree)
-            {
-                throw new InvalidOperationException();
+                SendKeys.SendWait(command);
             }
         }
     }

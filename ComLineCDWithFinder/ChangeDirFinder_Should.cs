@@ -78,7 +78,7 @@ namespace ComLineCDWithFinder
         }
 
         [Test]
-        public void ReturnCurDir_OnCurDirInput()
+        public void ReturnCurDir_OnCurDir()
         {
             PathFinder.GetPathTo(_curDirectory.FullName,_curDirectory.Name)[0].Should().Be(_curDirectory.FullName);
         }
@@ -136,7 +136,7 @@ namespace ComLineCDWithFinder
 
         [TestCase('\\')]
         [TestCase('/')]
-        public void ReturnPath_OnPathPartInput(char separator)
+        public void ReturnPath_OnPathPart(char separator)
         {
             var dir = _curDirectory.GetDirectories().First();
             var res = dir.GetDirectories().First();
