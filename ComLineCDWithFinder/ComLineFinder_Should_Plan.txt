@@ -1,5 +1,5 @@
-Command line change_directory_finder -> cd.finder
-path -> full Path
+Command line change_directory_finder -> cdf
+path = full Path
 
 
 Should:
@@ -16,7 +16,19 @@ Should:
 											"dir\someDir\otherDir"
 											...
 ------------------------
-10) flags
-11) Quotes over input, if there are spaces in names
+10) flags:
+			-count [intNumb] -> output intNumb paths
+			-all -> (default) output all paths
+			-s -> put string: "cd " + resultPath in console
+			-g -> (default) find and change directory
+			-i -> (default) ignore case
+			-c -> case dependent search
+			-h -> help
+11) Stars (*) in input path: test* = testPath, testASD ...
 
-12) Stack Overflow Exception
+???????????????????????
+
+ Quotes over input, if there are spaces in names
+ Stack Overflow Exception
+ Time limits
+ Cache
