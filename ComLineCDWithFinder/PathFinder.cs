@@ -13,6 +13,9 @@ namespace ComLineCDWithFinder
     {
 
         private static readonly char[] InvalidSymbols = new[] {'%', '|', '<', '>', '$'};
+        private static readonly char[] Separators = new[] {'\\', '/'};
+
+
 
         public static string[] GetPathTo(string curDir, string targetDir)
         {
@@ -26,17 +29,25 @@ namespace ComLineCDWithFinder
             return Find(currentDirectory, targetDir).Select(d=>d.FullName).ToArray();
         }
 
-        private static IEnumerable<DirectoryInfo> Find(DirectoryInfo parent, string dirName)
+        private static IEnumerable<DirectoryInfo> Find(DirectoryInfo parent, string target)
         {
             var subDirs = parent.GetDirectories();
             var dirs = new List<DirectoryInfo>();
-            var target = subDirs.FirstOrDefault(d => d.FullName.EndsWith(dirName));
-            if (target != null) dirs.Add(target);
+            var name = GetDirectoryName(target);
+            var targetName = subDirs.FirstOrDefault(
+                d => d.FullName.EndsWith(target) && d.Name == name);
+            if (targetName != null) dirs.Add(targetName);
             foreach (var subDir in subDirs)
             {
-                dirs.AddRange(Find(subDir, dirName));
+                dirs.AddRange(Find(subDir, target));
             }
             return dirs;
+        }
+
+        private static string GetDirectoryName(string path)
+        {
+            var index = path.LastIndexOfAny(Separators);
+            return index == -1 ? path : path.Substring(index + 1);
         }
     }
 }

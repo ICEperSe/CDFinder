@@ -143,6 +143,13 @@ namespace ComLineCDWithFinder
             PathFinder.GetPathTo(_curDirectory.FullName, name)[0].Should().Be(res.FullName);
         }
 
+        [Test]
+        public void ReturnEmpty_OnPartOfRealDirName()
+        {
+            CreateSubDirsWithOneName(_curDirectory, 1, "testDir");
+            PathFinder.GetPathTo(_curDirectory.FullName, "Dir").Should().BeNullOrEmpty();
+        }
+
         //[Test]
         public void NotThrowStackOverflowException_OnBigNesting()
         {
