@@ -15,16 +15,22 @@ Should:
 											"someDir\otherDir"
 											"dir\someDir\otherDir"
 											...
+10) Stars (*) in input path: test* = testPath, testASD ...
+							 test*\dir = test1\dir, testA\dir ...
+							 test\dir* = test\dir, test\dir1 ...
+							 test*\dir* = test1\dir1, test\dir ...
+11)
 ------------------------
 10) flags:
 			-count [intNumb] -> output intNumb paths
 			-all -> (default) output all paths
-			-s -> put string: "cd " + resultPath in console
+			-p -> put string: "cd " + resultPath in console
 			-g -> (default) find and change directory
 			-i -> (default) ignore case
 			-c -> case dependent search
+			-o -> find only in cur dir
 			-h -> help
-11) Stars (*) in input path: test* = testPath, testASD ...
+
 
 ???????????????????????
 

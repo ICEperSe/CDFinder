@@ -2,44 +2,64 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security;
-using System.Security.Permissions;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace ComLineCDWithFinder
 {
     internal static class PathFinder
     {
+        public const string Asterisk = "*";
+        private static readonly char[] InvalidSymbols = {'%', '|', '<', '>', '$'};
 
-        private static readonly char[] InvalidSymbols = new[] {'%', '|', '<', '>', '$'};
-        private static readonly char[] Separators = new[] {'\\', '/'};
+        private static readonly char[] Separators =
+            {Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar};
+
+        public static string[] GetPathTo(DirectoryInfo curDir, string targetDir)
+        {
+            return GetPathTo(curDir.FullName, targetDir);
+        }
 
         public static string[] GetPathTo(string curDir, string targetDir)
         {
             targetDir = ValidateSeparators(targetDir);
+            if(!Directory.Exists(curDir))
+                throw new ArgumentException();
             var currentDirectory = new DirectoryInfo(curDir);
-            if(targetDir == string.Empty || targetDir.IndexOfAny(InvalidSymbols) != -1)
+            if (targetDir == string.Empty || targetDir.IndexOfAny(InvalidSymbols) != -1)
                 throw new ArgumentException(nameof(targetDir));
-            if(targetDir == currentDirectory.Name)
-                return new []{currentDirectory.FullName};
-            if (Path.IsPathRooted(targetDir) && Directory.Exists(targetDir)) 
-                return new []{targetDir};
-            return Find(currentDirectory, targetDir).Select(d=>d.FullName).ToArray();
+            if (targetDir == currentDirectory.Name)
+                return new[] {currentDirectory.FullName};
+            if (Path.IsPathRooted(targetDir))
+            {
+                if(Directory.Exists(targetDir))
+                    return new[] {targetDir};
+                else 
+                    currentDirectory = new DirectoryInfo(Path.GetPathRoot(targetDir));
+            }
+            return Find(currentDirectory, GetSearchRule(targetDir))
+                    .Select(d => d.FullName)
+                    .ToArray();
         }
 
-        private static IEnumerable<DirectoryInfo> Find(DirectoryInfo parent, string target)
+        private static IEnumerable<DirectoryInfo> Find
+            (DirectoryInfo parent, Predicate<DirectoryInfo> rule)
         {
             var subDirs = parent.GetDirectories();
             var dirs = new List<DirectoryInfo>();
-            var name = GetDirectoryName(target);
-            var targetName = subDirs.FirstOrDefault(
-                d => d.FullName.EndsWith(target) && d.Name == name);
-            if (targetName != null) dirs.Add(targetName);
+            var targetFromParent = subDirs.Where(d=>rule(d));
+            dirs.AddRange(targetFromParent);
             foreach (var subDir in subDirs)
             {
-                dirs.AddRange(Find(subDir, target));
+                try
+                {
+                    dirs.AddRange(Find(subDir, rule));
+                }
+                catch
+                {
+                    // ignored
+                }
             }
+
             return dirs;
         }
 
@@ -50,10 +70,40 @@ namespace ComLineCDWithFinder
         }
 
         private static string ValidateSeparators(string path)
+            => path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+
+
+        private static Predicate<DirectoryInfo> GetSearchRule(string target)
         {
-            for (int i = 1; i < Separators.Length; i++)
-                path = path.Replace(Separators[i], Separators[0]);
-            return path;
+            if(!target.Contains(Asterisk))
+            {
+                if (target.IndexOfAny(Separators) == -1)
+                    return GetRule_ForSimpleName(target);
+                else
+                    return GetRule_ForPathPart(target);
+            }
+            
+            return GetRule_ForAsterisk(target);
+        }
+
+        private static Predicate<DirectoryInfo> GetRule_ForAsterisk(string target)
+        {
+            if(!Path.IsPathRooted(target))
+                target = Path.DirectorySeparatorChar + target;
+            target = Regex.Escape(target).Replace("\\" + Asterisk,"[^/\\\\]" + Asterisk);
+            var regex = new Regex("." + Asterisk + target + "$");
+            return d => regex.IsMatch(d.FullName);
+        }
+
+        private static Predicate<DirectoryInfo> GetRule_ForSimpleName(string target)
+        {
+            return d => d.Name == target;
+        }
+
+        private static Predicate<DirectoryInfo> GetRule_ForPathPart(string target)
+        {
+            var name = GetDirectoryName(target);
+            return d => d.FullName.EndsWith(target) && d.Name == name;
         }
     }
 }

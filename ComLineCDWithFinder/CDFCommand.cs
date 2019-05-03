@@ -45,7 +45,7 @@ namespace ComLineCDWithFinder
             var strBuilder = new StringBuilder();
             foreach (var dir in options)
             {
-                strBuilder.AppendLine($"{++i}. {dir}");
+                strBuilder.AppendLine($" {++i}. {dir}");
             }
             CommandShell.Write(strBuilder.ToString());
             CommandShell.Write("Enter number: ");

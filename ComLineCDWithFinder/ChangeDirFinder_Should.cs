@@ -26,14 +26,15 @@ namespace ComLineCDWithFinder
         private static IEnumerable<DirectoryInfo> CreateSubDirs(
             DirectoryInfo parent,
             int count, 
-            int nestingLvl)
+            int nestingLvl,
+            string namePrefix = "dir")
         {
             var dirs = new List<DirectoryInfo>();
             if (nestingLvl <= 0) return dirs.ToArray();
             var i = count;
             while (i-- > 0)
             {
-                var name = GetNameForSubDir(parent);
+                var name = GetNameForSubDir(parent, namePrefix);
                 dirs.Add(parent.CreateSubdirectory(name));
             }
             var nest = new List<DirectoryInfo>();
@@ -46,7 +47,7 @@ namespace ComLineCDWithFinder
         }
 
 
-        private static IEnumerable<DirectoryInfo> CreateSubDirsWithOneName(
+        private static IEnumerable<DirectoryInfo> CreateNestingDirsWithOneName(
             DirectoryInfo parent,
             int nestingLvl,
             string name)
@@ -55,13 +56,25 @@ namespace ComLineCDWithFinder
             if (nestingLvl <= 0) return dirs;
             var subDir = parent.CreateSubdirectory(name);
             dirs.Add(subDir);
-            dirs.AddRange(CreateSubDirsWithOneName(subDir, nestingLvl - 1,name));
+            dirs.AddRange(CreateNestingDirsWithOneName(subDir, nestingLvl - 1,name));
             return dirs;
         }
 
-        private static string GetNameForSubDir(DirectoryInfo parent)
+        private static IEnumerable<DirectoryInfo> GetDirs(DirectoryInfo parent, Predicate<DirectoryInfo> rule)
         {
-            var strB = new StringBuilder("dir" + _random.Next());
+            var res = new List<DirectoryInfo>();
+            res.AddRange(parent.GetDirectories().Where(d=>rule(d)));
+            foreach (var dir in parent.GetDirectories())
+            {
+                res.AddRange(GetDirs(dir, rule));
+            }
+
+            return res;
+        }
+
+        private static string GetNameForSubDir(DirectoryInfo parent, string namePrefix)
+        {
+            var strB = new StringBuilder(namePrefix + _random.Next());
             while (File.Exists(parent.FullName + strB))
             {
                 strB.Append(_random.Next());
@@ -95,7 +108,9 @@ namespace ComLineCDWithFinder
         {
             var dirs = _curDirectory.GetDirectories();
             var target = dirs[1].GetDirectories().First();
-            PathFinder.GetPathTo(_curDirectory.FullName,target.Name)[0].Should().Be(target.FullName);
+            PathFinder.GetPathTo(_curDirectory.FullName,target.Name)[0]
+                .Should()
+                .Be(target.FullName);
         }
 
         [Test]
@@ -116,7 +131,7 @@ namespace ComLineCDWithFinder
         [Test]
         public void ReturnCollection_OnDirInput_IfThereAreSeveralDirs()
         {
-            var dirs = CreateSubDirsWithOneName(_curDirectory,
+            var dirs = CreateNestingDirsWithOneName(_curDirectory,
                 4,
                 "oneName");
             PathFinder.GetPathTo(_curDirectory.FullName,"oneName")
@@ -147,8 +162,69 @@ namespace ComLineCDWithFinder
         [Test]
         public void ReturnEmpty_OnPartOfRealDirName()
         {
-            CreateSubDirsWithOneName(_curDirectory, 1, "testDir");
-            PathFinder.GetPathTo(_curDirectory.FullName, "Dir").Should().BeNullOrEmpty();
+            PathFinder.GetPathTo(_curDirectory.FullName, "dir")
+                .Should()
+                .BeNullOrEmpty();
+        }
+
+        [Test]
+        public void ReturnPath_OnAsterisk_InName()
+        {
+            var parent = _curDirectory.CreateSubdirectory(GetNameForSubDir(_curDirectory,""));
+            var dirs = CreateSubDirs(parent, 2, 3).ToArray();
+            PathFinder.GetPathTo(parent.FullName, "dir*")
+                .Should()
+                .BeEquivalentTo(dirs.Select(d => d.FullName));
+        }
+
+        [TestCase('\\')]
+        [TestCase('/')]
+        public void ReturnPath_OnAsterisk_InPathPart(char separator)
+        {
+            var target = _curDirectory
+                .GetDirectories()
+                .First(d => d.Name.StartsWith("dir"))
+                .GetDirectories()
+                .First();
+            var path = "dir*" + separator + target.Name;
+            PathFinder.GetPathTo(_curDirectory.FullName, path)
+                .Should()
+                .BeEquivalentTo(target.FullName);
+        }
+
+        [TestCase('\\')]
+        [TestCase('/')]
+        public void ReturnPath_OnAsterisk_InPathPartAndName(char separator)
+        {
+            var dirs = GetDirs(_curDirectory, d=>d.GetDirectories().Length == 0).Where(d=>d.Name.StartsWith("dir"));
+            var path = "dir*" + separator + "dir*" + separator + "dir*";
+            PathFinder.GetPathTo(_curDirectory.FullName, path)
+                .Should()
+                .BeEquivalentTo(dirs.Select(d=>d.FullName));
+        }
+
+        [Test]
+        public void ReturnPath_OnAsterisk_AfterDriveName()
+        {
+            var pathStrings = _curDirectory
+                .FullName
+                .Split(Path.DirectorySeparatorChar);
+            var inputPath = new StringBuilder(pathStrings[0]);
+            for (var i = 1; i < pathStrings.Length-1; i++)
+                inputPath.Append(Path.DirectorySeparatorChar + PathFinder.Asterisk);
+            inputPath.Append(Path.DirectorySeparatorChar +_curDirectory.Name);
+            PathFinder.GetPathTo(_curDirectory.FullName, inputPath.ToString())
+                .Should()
+                .BeEquivalentTo(_curDirectory.FullName);
+        }
+
+        [Test]
+        public void ReturnSubDirsList_OnAsterisk_Only()
+        {
+            PathFinder.GetPathTo(_curDirectory.FullName, "*")
+                .Should()
+                .BeEquivalentTo(GetDirs(_curDirectory, d=>true)
+                    .Select(d => d.FullName));
         }
 
         //[Test]
