@@ -10,8 +10,9 @@ using System.Windows.Forms;
 
 namespace ComLineCDWithFinder
 {
-    class WinCMDShell : ICommandShell
+    class WinCommandShell : ICommandShell
     {
+        private readonly string[] SpecialKeys = new[] {"{", "}","+","^","%","~", "(", ")"};
 
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool AttachConsole(uint dwProcessId);
@@ -21,8 +22,6 @@ namespace ComLineCDWithFinder
     
         [DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
-
-
 
         public void Write(string str)
         {
@@ -47,8 +46,19 @@ namespace ComLineCDWithFinder
             else
             {
                 SetForegroundWindow(Process.GetCurrentProcess().MainWindowHandle);
-                SendKeys.SendWait(command);
+                SendKeys.SendWait(ValidateCommand(command) + "{ENTER}");
             }
+        }
+
+        private string ValidateCommand(string command)
+        {
+            var strB = new StringBuilder(command);
+            foreach (var key in SpecialKeys)
+            {
+                strB.Replace(key, "{" + key + "}");
+            }
+
+            return strB.ToString();
         }
     }
 }

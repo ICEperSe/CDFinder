@@ -13,7 +13,7 @@ namespace ComLineCDWithFinder
         {
             if (args.Length >= 1)
             {
-                new CDFCommand(new WinCMDShell()).Run(args);
+                new CDFCommand(new WinCommandShell()).Run(args);
             }
         }
     }

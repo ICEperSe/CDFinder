@@ -36,12 +36,12 @@ namespace ComLineCDWithFinder
                 else 
                     currentDirectory = new DirectoryInfo(Path.GetPathRoot(targetDir));
             }
-            return Find(currentDirectory, GetSearchRule(targetDir))
+            return FindDirectories(currentDirectory, GetSearchRule(targetDir))
                     .Select(d => d.FullName)
                     .ToArray();
         }
 
-        private static IEnumerable<DirectoryInfo> Find
+        private static IEnumerable<DirectoryInfo> FindDirectories
             (DirectoryInfo parent, Predicate<DirectoryInfo> rule)
         {
             var subDirs = parent.GetDirectories();
@@ -52,7 +52,7 @@ namespace ComLineCDWithFinder
             {
                 try
                 {
-                    dirs.AddRange(Find(subDir, rule));
+                    dirs.AddRange(FindDirectories(subDir, rule));
                 }
                 catch
                 {
@@ -71,7 +71,6 @@ namespace ComLineCDWithFinder
 
         private static string ValidateSeparators(string path)
             => path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-
 
         private static Predicate<DirectoryInfo> GetSearchRule(string target)
         {
