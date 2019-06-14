@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
+using System.Management;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ComLineCDWithFinder
 {
     class WinCommandShell : ICommandShell
     {
-        private readonly string[] SpecialKeys = new[] {"{", "}","+","^","%","~", "(", ")"};
+        private readonly string[] SpecialKeys = {"{", "}","+","^","%","~", "(", ")"};
 
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool AttachConsole(uint dwProcessId);
@@ -35,19 +32,32 @@ namespace ComLineCDWithFinder
 
         public void PutCommandToLine(string command)
         {
-            var process = Process.GetProcessesByName("cmd");
-            if (process.Length <= 0) return;
-            var pId = process[0].Id;
+            var process = GetParentProcess(Process.GetCurrentProcess());
+            var pId = process.Id;
             FreeConsole();
             if (!AttachConsole((uint) pId))
             {
-                Write(Marshal.GetLastWin32Error().ToString());
+                Write(
+                    Marshal.GetLastWin32Error().ToString()
+                    );
             }
             else
             {
                 SetForegroundWindow(Process.GetCurrentProcess().MainWindowHandle);
-                SendKeys.SendWait(ValidateCommand(command) + "{ENTER}");
+                SendKeys.SendWait(
+                    ValidateCommand(command) + "{ENTER}"
+                    );
             }
+        }
+
+        private Process GetParentProcess(Process curProcess)
+        {
+            var query = $"SELECT ParentProcessId FROM Win32_Process WHERE ProcessId = {curProcess.Id}";
+            var search = new ManagementObjectSearcher("root\\CIMV2", query);
+            var results = search.Get().GetEnumerator();
+            results.MoveNext();
+            var queryObj = results.Current;
+            return Process.GetProcessById((int)(uint)queryObj["ParentProcessId"]);
         }
 
         private string ValidateCommand(string command)

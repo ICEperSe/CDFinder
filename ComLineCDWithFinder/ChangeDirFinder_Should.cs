@@ -86,21 +86,21 @@ namespace ComLineCDWithFinder
         public void Throw_OnEmptyInput()
         {
             Assert.Throws<ArgumentException>(()=>
-                PathFinder.GetPathTo(_curDirectory.FullName,string.Empty)
+                PathFinder.GetPath(_curDirectory.FullName,string.Empty)
                 );
         }
 
         [Test]
         public void ReturnCurDir_OnCurDir()
         {
-            PathFinder.GetPathTo(_curDirectory.FullName,_curDirectory.Name)[0].Should().Be(_curDirectory.FullName);
+            PathFinder.GetPath(_curDirectory.FullName,_curDirectory.Name)[0].Should().Be(_curDirectory.FullName);
         }
 
         [Test]
         public void ReturnPath_OnSubDir()
         {
             var dirs = _curDirectory.GetDirectories();
-            PathFinder.GetPathTo(_curDirectory.FullName,dirs[0].Name)[0].Should().Be(dirs[0].FullName);
+            PathFinder.GetPath(_curDirectory.FullName,dirs[0].Name)[0].Should().Be(dirs[0].FullName);
         }
 
         [Test]
@@ -108,7 +108,7 @@ namespace ComLineCDWithFinder
         {
             var dirs = _curDirectory.GetDirectories();
             var target = dirs[1].GetDirectories().First();
-            PathFinder.GetPathTo(_curDirectory.FullName,target.Name)[0]
+            PathFinder.GetPath(_curDirectory.FullName,target.Name)[0]
                 .Should()
                 .Be(target.FullName);
         }
@@ -116,7 +116,7 @@ namespace ComLineCDWithFinder
         [Test]
         public void ReturnEmpty_IfDirNotExists()
         {
-            PathFinder.GetPathTo(_curDirectory.FullName,"iDontExist").Should().BeNullOrEmpty();
+            PathFinder.GetPath(_curDirectory.FullName,"iDontExist").Should().BeNullOrEmpty();
         }
 
         [TestCase(@"C:\", ExpectedResult = @"C:\")]
@@ -125,7 +125,7 @@ namespace ComLineCDWithFinder
                   ExpectedResult = @"C:\Users\ASUS\Desktop\Prog")]
         public string ReturnPath_OnFullPath(string path)
         {
-            return PathFinder.GetPathTo(_curDirectory.FullName,path)[0];
+            return PathFinder.GetPath(_curDirectory.FullName,path)[0];
         }
 
         [Test]
@@ -134,7 +134,7 @@ namespace ComLineCDWithFinder
             var dirs = CreateNestingDirsWithOneName(_curDirectory,
                 4,
                 "oneName");
-            PathFinder.GetPathTo(_curDirectory.FullName,"oneName")
+            PathFinder.GetPath(_curDirectory.FullName,"oneName")
                 .Should()
                 .BeEquivalentTo(dirs.Select(d=>d.FullName));
         }
@@ -146,7 +146,7 @@ namespace ComLineCDWithFinder
         [TestCase("namewith $")]
         public void Throw_OnWrongSymbols(string target)
         {
-            Assert.Throws<ArgumentException>(() => PathFinder.GetPathTo(_curDirectory.FullName,target));
+            Assert.Throws<ArgumentException>(() => PathFinder.GetPath(_curDirectory.FullName,target));
         }
 
         [TestCase('\\')]
@@ -156,13 +156,13 @@ namespace ComLineCDWithFinder
             var dir = _curDirectory.GetDirectories().First();
             var res = dir.GetDirectories().First();
             var name = dir.Name + separator + res.Name;
-            PathFinder.GetPathTo(_curDirectory.FullName, name)[0].Should().Be(res.FullName);
+            PathFinder.GetPath(_curDirectory.FullName, name)[0].Should().Be(res.FullName);
         }
 
         [Test]
         public void ReturnEmpty_OnPartOfRealDirName()
         {
-            PathFinder.GetPathTo(_curDirectory.FullName, "dir")
+            PathFinder.GetPath(_curDirectory.FullName, "dir")
                 .Should()
                 .BeNullOrEmpty();
         }
@@ -172,7 +172,7 @@ namespace ComLineCDWithFinder
         {
             var parent = _curDirectory.CreateSubdirectory(GetNameForSubDir(_curDirectory,""));
             var dirs = CreateSubDirs(parent, 2, 3).ToArray();
-            PathFinder.GetPathTo(parent.FullName, "dir*")
+            PathFinder.GetPath(parent.FullName, "dir*")
                 .Should()
                 .BeEquivalentTo(dirs.Select(d => d.FullName));
         }
@@ -187,7 +187,7 @@ namespace ComLineCDWithFinder
                 .GetDirectories()
                 .First();
             var path = "dir*" + separator + target.Name;
-            PathFinder.GetPathTo(_curDirectory.FullName, path)
+            PathFinder.GetPath(_curDirectory.FullName, path)
                 .Should()
                 .BeEquivalentTo(target.FullName);
         }
@@ -198,7 +198,7 @@ namespace ComLineCDWithFinder
         {
             var dirs = GetDirs(_curDirectory, d=>d.GetDirectories().Length == 0).Where(d=>d.Name.StartsWith("dir"));
             var path = "dir*" + separator + "dir*" + separator + "dir*";
-            PathFinder.GetPathTo(_curDirectory.FullName, path)
+            PathFinder.GetPath(_curDirectory.FullName, path)
                 .Should()
                 .BeEquivalentTo(dirs.Select(d=>d.FullName));
         }
@@ -213,7 +213,7 @@ namespace ComLineCDWithFinder
             for (var i = 1; i < pathStrings.Length-1; i++)
                 inputPath.Append(Path.DirectorySeparatorChar + PathFinder.Asterisk);
             inputPath.Append(Path.DirectorySeparatorChar +_curDirectory.Name);
-            PathFinder.GetPathTo(_curDirectory.FullName, inputPath.ToString())
+            PathFinder.GetPath(_curDirectory.FullName, inputPath.ToString())
                 .Should()
                 .BeEquivalentTo(_curDirectory.FullName);
         }
@@ -221,7 +221,7 @@ namespace ComLineCDWithFinder
         [Test]
         public void ReturnSubDirsList_OnAsterisk_Only()
         {
-            PathFinder.GetPathTo(_curDirectory.FullName, "*")
+            PathFinder.GetPath(_curDirectory.FullName, "*")
                 .Should()
                 .BeEquivalentTo(GetDirs(_curDirectory, d=>true)
                     .Select(d => d.FullName));

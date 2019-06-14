@@ -22,8 +22,9 @@ Should:
 11)
 ------------------------
 10) flags:
-			-count [intNumb] -> output intNumb paths
-			-all -> (default) output all paths
+			-count=intNumb -> output intNumb paths
+			-all ->  output all paths
+			-s -> (default) output first path
 			-p -> put string: "cd " + resultPath in console
 			-g -> (default) find and change directory
 			-i -> (default) ignore case

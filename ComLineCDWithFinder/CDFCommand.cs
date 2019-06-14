@@ -20,7 +20,7 @@ namespace ComLineCDWithFinder
         public void Run(string[] args)
         {
             var curDir = Environment.CurrentDirectory;
-            var targetDirs = PathFinder.GetPathTo(curDir, args[0]);
+            var targetDirs = PathFinder.GetPath(curDir, args[0]);
             if (targetDirs.Length == 0)
             {
                 CommandShell.Write("There is no such directory");

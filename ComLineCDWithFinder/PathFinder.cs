@@ -14,12 +14,12 @@ namespace ComLineCDWithFinder
         private static readonly char[] Separators =
             {Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar};
 
-        public static string[] GetPathTo(DirectoryInfo curDir, string targetDir)
+        public static string[] GetPath(DirectoryInfo curDir, string targetDir)
         {
-            return GetPathTo(curDir.FullName, targetDir);
+            return GetPath(curDir.FullName, targetDir);
         }
 
-        public static string[] GetPathTo(string curDir, string targetDir)
+        public static string[] GetPath(string curDir, string targetDir)
         {
             targetDir = ValidateSeparators(targetDir);
             if(!Directory.Exists(curDir))
@@ -44,12 +44,11 @@ namespace ComLineCDWithFinder
         private static IEnumerable<DirectoryInfo> FindDirectories
             (DirectoryInfo parent, Predicate<DirectoryInfo> rule)
         {
-            var subDirs = parent.GetDirectories();
             var dirs = new List<DirectoryInfo>();
-            var targetFromParent = subDirs.Where(d=>rule(d));
-            dirs.AddRange(targetFromParent);
-            foreach (var subDir in subDirs)
+            foreach (var subDir in parent.GetDirectories())
             {
+                if(rule(subDir))
+                    dirs.Add(subDir);
                 try
                 {
                     dirs.AddRange(FindDirectories(subDir, rule));
@@ -61,6 +60,23 @@ namespace ComLineCDWithFinder
             }
 
             return dirs;
+        }
+
+        private static void GoThroughDirectories(DirectoryInfo parentDirectory, Action<DirectoryInfo> doOnDirectory)
+        {
+            var subDirs = parentDirectory.GetDirectories();
+            foreach (var subDir in subDirs)
+            {
+                try
+                {
+                    doOnDirectory?.Invoke(subDir);
+                    GoThroughDirectories(subDir, doOnDirectory);
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
         }
 
         private static string GetDirectoryName(string path)
