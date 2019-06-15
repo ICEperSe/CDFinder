@@ -1,0 +1,20 @@
+﻿
+ConstrainedCollection Should
+
+Throw exception on Add(item), if item doesnt satisfy the constraint or null
+Return true on TryAdd(item), if item satisfies the constraint or null
+Return false on TryAdd(item), if item doesnt satisfy the constraint
+Add valid item on Add(item)
+Add valid item on TryAdd(item)
+Add few elements on several elements Add
+Add few elements on several elements TryAdd
+Not add item on TryAdd(item), if it returns false
+Not add item on Add(item), if it Throw exception
+Retrun correct count on Count
+Remove item from collection
+Implement Contains correctly
+Be empty, after Clear
+
+Throw exception on Add(item), if size is limited and count >= size
+Return false on TryAdd(item), if size is limited and count >= size
+

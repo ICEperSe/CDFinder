@@ -70,8 +70,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CDFCommand.cs" />
+    <Compile Include="ConstrainedList.cs" />
     <Compile Include="FlagsProvider.cs" />
     <Compile Include="ICommandShell.cs" />
+    <Compile Include="ConstrainedCollection_Should.cs" />
+    <Compile Include="IConstraintedCollection.cs" />
     <Compile Include="PathFinder.cs" />
     <Compile Include="ChangeDirFinder_Should.cs" />
     <Compile Include="Program.cs" />
@@ -84,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ComLineFinder_Should_Plan.txt" />
+    <Content Include="ConstrainedCollection_Should_Plan.txt" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
