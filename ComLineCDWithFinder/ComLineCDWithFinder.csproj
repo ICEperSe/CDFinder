@@ -69,25 +69,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CDFCommand.cs" />
-    <Compile Include="ConstrainedList.cs" />
+    <Compile Include="Infrastructure\CDFCommand.cs" />
+    <Compile Include="Infrastructure\ConstrainedList.cs" />
     <Compile Include="FlagsProvider.cs" />
-    <Compile Include="ICommandShell.cs" />
-    <Compile Include="ConstrainedCollection_Should.cs" />
-    <Compile Include="IConstraintedCollection.cs" />
+    <Compile Include="Infrastructure\ICommandShell.cs" />
+    <Compile Include="Tests\ConstrainedCollection_Should.cs" />
+    <Compile Include="Infrastructure\IConstraintedCollection.cs" />
     <Compile Include="PathFinder.cs" />
-    <Compile Include="ChangeDirFinder_Should.cs" />
+    <Compile Include="Tests\ChangeDirFinder_Should.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WinCommandShell.cs" />
+    <Compile Include="Infrastructure\WinCommandShell.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ComLineFinder_Should_Plan.txt" />
-    <Content Include="ConstrainedCollection_Should_Plan.txt" />
+    <Content Include="Concepts\ComLineFinder_Should_Plan.txt" />
+    <Content Include="Concepts\ConstrainedCollection_Should_Plan.txt" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
