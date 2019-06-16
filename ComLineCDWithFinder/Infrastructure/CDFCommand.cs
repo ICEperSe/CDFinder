@@ -20,7 +20,7 @@ namespace ComLineCDWithFinder
         public void Run(string[] args)
         {
             var curDir = Environment.CurrentDirectory;
-            var targetDirs = PathFinder.GetPath(curDir, args[0]);
+            var targetDirs = GetTargetDirs(curDir, args);
             if (targetDirs.Length == 0)
             {
                 CommandShell.Write("There is no such directory");
@@ -37,20 +37,22 @@ namespace ComLineCDWithFinder
             }
         }
 
-        //todo: refactor, srp principle
+        private string[] GetTargetDirs(string curDir, string[] options)
+        {
+            return PathFinder.GetPath(curDir, options[0]);
+        }
+
         private bool SelectSingleOption(IReadOnlyList<string> options, out string path)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
-            var i = 0;
-            var strBuilder = new StringBuilder();
-            foreach (var dir in options)
-            {
-                strBuilder.AppendLine($" {++i}. {dir}");
-            }
-            CommandShell.Write(strBuilder.ToString());
+
+            OutputCollectionWithNumbers(options);
+
             CommandShell.Write("Enter number: ");
-            if (int.TryParse(CommandShell.Read(), out var numb) 
-                && numb <= options.Count && numb > 0)
+            if (
+                int.TryParse(CommandShell.Read(), out var numb) 
+                && numb <= options.Count 
+                && numb > 0)
             {
                 path = options[numb - 1];
                 return true;
@@ -58,6 +60,17 @@ namespace ComLineCDWithFinder
 
             path = null;
             return false;
+        }
+
+        private void OutputCollectionWithNumbers(IReadOnlyList<string> collection)
+        {
+            var i = 0;
+            var strBuilder = new StringBuilder();
+            foreach (var dir in collection)
+            {
+                strBuilder.AppendLine($" {++i}. {dir}");
+            }
+            CommandShell.Write(strBuilder.ToString());
         }
     }
 }
