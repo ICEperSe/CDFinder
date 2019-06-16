@@ -11,13 +11,15 @@ namespace ComLineCDWithFinder.Infrastructure
         private readonly ICommandShell _commandShell;
 
         private const string Command = "cd";
-        private const string Help = @"Command line change_directory_finder
-                                        -count=intNumb -> output intNumb paths
-			                            -all ->  output all paths
-			                            -s -> (default) output first path
-			                            -i -> (default) ignore case
-			                            -c -> case dependent search
-			                            -h -> help";
+        private const string Help = @"
+Command line change_directory_finder
+-count=intNumb -> output intNumb paths
+-all ->  output all paths
+-s -> (default) output first path
+-i -> (default) ignore case
+-c -> case dependent search
+-h -> help
+";
 
         public CDFCommand(ICommandShell commandShell)
         {
