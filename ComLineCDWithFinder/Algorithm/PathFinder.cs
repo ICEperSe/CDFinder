@@ -9,32 +9,31 @@ namespace ComLineCDWithFinder.Algorithm
         public const string Asterisk = "*";
         private static readonly char[] InvalidSymbols = { '%', '|', '<', '>', '$' };
 
-        public static string[] GetPath(string curDir, string targetDir)
+        public static string[] GetPaths(string curDir, string targetDir)
         {
-            return GetPaths(curDir, targetDir, false, int.MaxValue);
+            return GetPaths(curDir, targetDir, false, null);
         }
 
-        public static string[] GetPath(string curDir, string targetDir, bool ignoreCase)
+        public static string[] GetPaths(string curDir, string targetDir, bool ignoreCase)
         {
-            return GetPaths(curDir, targetDir, ignoreCase, int.MaxValue);
+            return GetPaths(curDir, targetDir, ignoreCase, null);
         }
 
-        public static string[] GetPaths(string curDir, string targetDir, bool ignoreCase, int count)
+        public static string[] GetPaths(string curDir, string targetDir, bool ignoreCase, int? count)
         {
             if(curDir == null) throw new ArgumentNullException(nameof(curDir));
             if(targetDir == null) throw new ArgumentNullException(nameof(targetDir));
-
-            if (!Directory.Exists(curDir))
-                throw new ArgumentException();
-
-
-            targetDir = ValidateSeparators(targetDir);
+            if (!Directory.Exists(curDir))throw new ArgumentException();
             if (targetDir == string.Empty || targetDir.IndexOfAny(InvalidSymbols) != -1)
                 throw new ArgumentException(nameof(targetDir));
-
+            
+            targetDir = ValidateSeparators(targetDir);
             var startDir = new DirectoryInfo(curDir);
             if (targetDir == startDir.Name)
                 return new[] { startDir.FullName };
+
+            if (targetDir.StartsWith(Path.DirectorySeparatorChar.ToString()))
+                targetDir = Asterisk + targetDir;
 
             if (Path.IsPathRooted(targetDir))
             {
@@ -45,9 +44,10 @@ namespace ComLineCDWithFinder.Algorithm
             }
 
             var controller = new DirSearchController(
-                DirectorySearchRuleProvider.GetRule(targetDir, ignoreCase), count);
+                DirectorySearchRuleProvider.GetRule(targetDir, ignoreCase), count??int.MaxValue);
 
             GoThroughSubDirs(startDir, controller);
+
             return controller.FoundedItems.Select(d=>d.FullName).ToArray();
         }
 
@@ -58,9 +58,14 @@ namespace ComLineCDWithFinder.Algorithm
             {
                 foreach (var subDir in parentDirectory.GetDirectories())
                 {
-                    controller.GetItem(subDir);
                     if (!controller.IsEnd)
+                    {
+                        controller.GetItem(subDir);
                         GoThroughSubDirs(subDir, controller);
+                    }
+                    else 
+                        break;
+                    
                 }
             }
             catch
