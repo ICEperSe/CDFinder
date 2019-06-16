@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using ComLineCDWithFinder.Algorithm;
 
@@ -7,38 +8,80 @@ namespace ComLineCDWithFinder.Infrastructure
 {
     class CDFCommand
     {
-        private readonly ICommandShell CommandShell;
+        private readonly ICommandShell _commandShell;
 
         private const string Command = "cd";
+        private const string Help = @"Command line change_directory_finder
+                                        -count=intNumb -> output intNumb paths
+			                            -all ->  output all paths
+			                            -s -> (default) output first path
+			                            -i -> (default) ignore case
+			                            -c -> case dependent search
+			                            -h -> help";
 
         public CDFCommand(ICommandShell commandShell)
         {
-            CommandShell = commandShell;
+            _commandShell = commandShell;
         }
 
-        public void Run(string[] args)
+        public void Execute(string[] args)
         {
-            var curDir = Environment.CurrentDirectory;
-            var targetDirs = GetTargetDirs(curDir, args);
-            if (targetDirs.Length == 0)
+            if(args is null) throw new ArgumentNullException();
+            if(args.Length == 0) throw new ArgumentException(nameof(args));
+
+            var options = FlagsProvider.GetOptions(args);
+            if(options.Contains(Option.Undefined))
+                throw new ArgumentException("Invalid flags");
+
+            if (options.Contains(Option.Help))
             {
-                CommandShell.Write("There is no such directory");
+                OutputHelp();
+            }
+            else
+                OutputResultAndSelect(
+                    GetTargetPaths(Environment.CurrentDirectory,options, args)
+                    );
+        }
+
+        private void OutputHelp()
+        {
+            _commandShell.Write(Help);
+        }
+
+        private void OutputResultAndSelect(string[] paths)
+        {
+            if (paths.Length == 0)
+            {
+                _commandShell.Write("There is no such directory");
                 return;
             }
-            if (targetDirs.Length == 1)
+            if (paths.Length == 1)
             {
-                CommandShell.PutCommandToLine(Command + " " + targetDirs[0]);
+                _commandShell.PutCommandToLine(Command + " " + paths[0]);
             }
             else
             {
-                if(SelectSingleOption(targetDirs, out var path))
-                    CommandShell.PutCommandToLine(Command + " " +path);
+                if(SelectSingleOption(paths, out var path))
+                    _commandShell.PutCommandToLine(Command + " " +path);
             }
         }
 
-        private string[] GetTargetDirs(string curDir, string[] options)
+
+        private string[] GetTargetPaths(string curDir,Option[] options, string[] args)
         {
-            return PathFinder.GetPath(curDir, options[0]);
+            var target = args.FirstOrDefault(s => !s.StartsWith("-"));
+            if(target is null) 
+                throw new ArgumentException("Target is not there: " + nameof(args));
+
+            var ignoreCase = options.Contains(Option.IgnoreCase);
+            int? count = null;
+
+            if (options.Contains(Option.OutputCount))
+                count = FlagsProvider.GetCountForCountFlag(args);
+            else if (options.Contains(Option.OutputSingle))
+                count = 1;
+
+            return PathFinder.GetPaths(curDir, target, ignoreCase, count);
         }
 
         private bool SelectSingleOption(IReadOnlyList<string> options, out string path)
@@ -47,9 +90,9 @@ namespace ComLineCDWithFinder.Infrastructure
 
             OutputCollectionWithNumbers(options);
 
-            CommandShell.Write("Enter number: ");
+            _commandShell.Write("Enter number: ");
             if (
-                int.TryParse(CommandShell.Read(), out var numb) 
+                int.TryParse(_commandShell.Read(), out var numb) 
                 && numb <= options.Count 
                 && numb > 0)
             {
@@ -69,7 +112,7 @@ namespace ComLineCDWithFinder.Infrastructure
             {
                 strBuilder.AppendLine($" {++i}. {dir}");
             }
-            CommandShell.Write(strBuilder.ToString());
+            _commandShell.Write(strBuilder.ToString());
         }
     }
 }
