@@ -22,7 +22,8 @@ namespace ComLineCDWithFinder.Tests
         [Test]
         public void ReturnArray_OnValidFlags()
         {
-            FlagsProvider.GetOptions("-i", "-s").Should().BeEquivalentTo(new[]{Option.IgnoreCase, Option.OutputSingle});
+            FlagsProvider.GetOptions("-count=20", "-i").Should()
+                .BeEquivalentTo(new[]{Option.OutputCount, Option.IgnoreCase});
         }
 
         [Test]
@@ -42,6 +43,7 @@ namespace ComLineCDWithFinder.Tests
                 ()=>FlagsProvider.GetCountForCountFlag("-s","-i")
                 );
         }
+
 
         [Test]
         public void Throw_OnGetCount_IfCountFlagInvalid()

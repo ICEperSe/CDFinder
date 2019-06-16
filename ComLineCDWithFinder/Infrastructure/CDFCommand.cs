@@ -68,20 +68,18 @@ Command line change_directory_finder
             }
         }
 
-
         private string[] GetTargetPaths(string curDir,Option[] options, string[] args)
         {
             var target = args.FirstOrDefault(s => !s.StartsWith("-"));
             if(target is null) 
                 throw new ArgumentException("Target is not there: " + nameof(args));
-
-            var ignoreCase = options.Contains(Option.IgnoreCase);
-            int? count = null;
+            var ignoreCase = !options.Contains(Option.CaseSensitive);
+            int? count = 1;
 
             if (options.Contains(Option.OutputCount))
                 count = FlagsProvider.GetCountForCountFlag(args);
-            else if (options.Contains(Option.OutputSingle))
-                count = 1;
+            else if (options.Contains(Option.OutputAll))
+                count = null;
 
             return PathFinder.GetPaths(curDir, target, ignoreCase, count);
         }

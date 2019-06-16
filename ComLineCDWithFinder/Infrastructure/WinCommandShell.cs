@@ -45,8 +45,7 @@ namespace ComLineCDWithFinder.Infrastructure
             {
                 SetForegroundWindow(Process.GetCurrentProcess().MainWindowHandle);
                 SendKeys.SendWait(
-                    ValidateCommand(command) + "{ENTER}"
-                    );
+                    ValidateCommand(command));
             }
         }
 

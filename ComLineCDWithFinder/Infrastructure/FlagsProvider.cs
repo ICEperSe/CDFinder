@@ -32,7 +32,7 @@ namespace ComLineCDWithFinder.Infrastructure
                         options.Add(Option.Help);
                         break;
                     case string countFlag when arg.Contains("-count="):
-                        countFlag = arg.Substring(arg.IndexOf("=", StringComparison.Ordinal));
+                        countFlag = arg.Substring(arg.IndexOf("=", StringComparison.Ordinal)+1);
                         if(int.TryParse(countFlag, out _))
                             options.Add(Option.OutputCount);
                         else options.Add(Option.Undefined);
