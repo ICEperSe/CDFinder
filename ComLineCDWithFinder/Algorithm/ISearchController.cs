@@ -1,4 +1,4 @@
-﻿namespace ComLineCDWithFinder
+﻿namespace ComLineCDWithFinder.Algorithm
 {
     public interface ISearchController<T>
     {

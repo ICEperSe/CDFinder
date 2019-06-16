@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 
-namespace ComLineCDWithFinder
+namespace ComLineCDWithFinder.Algorithm
 {
     internal static class PathFinder
     {
