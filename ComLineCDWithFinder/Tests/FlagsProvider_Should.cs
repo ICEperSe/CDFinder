@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using ComLineCDWithFinder.Infrastructure;
 using FluentAssertions;
 using NUnit.Framework;
@@ -21,16 +22,45 @@ namespace ComLineCDWithFinder.Tests
         [Test]
         public void ReturnArray_OnValidFlags()
         {
-            FlagsProvider.GetOptions("-i -s").Should().BeEquivalentTo(new[]{Option.Help});
+            FlagsProvider.GetOptions("-i", "-s").Should().BeEquivalentTo(new[]{Option.IgnoreCase, Option.OutputSingle});
         }
 
         [Test]
         [TestCase(new object[] {"-all", "-sss"})]
         [TestCase(new object[] {"-all", "-t", "-i"})]
-        [TestCase(new object[] {"-y"})]
-        public void ReturnUndefined_OnInvalidFlag(string[] args)
+        [TestCase(new object[] {"-count=4r"})]
+        [TestCase(new object[] {"-r"})]
+        public void ReturnUndefined_OnInvalidFlag(object[] args)
         {
-            FlagsProvider.GetOptions(args).Should().BeEquivalentTo(new[]{Option.Undefined});
+            FlagsProvider.GetOptions(args.Select(o=>o.ToString()).ToArray()).Should().BeEquivalentTo(new[]{Option.Undefined});
+        }
+
+        [Test]
+        public void Throw_OnGetCount_IfNoCountFlag()
+        {
+            Assert.Throws<ArgumentException>(
+                ()=>FlagsProvider.GetCountForCountFlag("-s","-i")
+                );
+        }
+
+        [Test]
+        public void Throw_OnGetCount_IfCountFlagInvalid()
+        {
+            Assert.Throws<ArgumentException>(
+                ()=>FlagsProvider.GetCountForCountFlag("-count=3e3","-i")
+            );
+        }
+
+        [Test]
+        [TestCase(new object[] {"-count=50"}, 50)]
+        [TestCase(new object[] {"-i","-count=10"}, 10)]
+        [TestCase(new object[] {"-count=1330", "-c"}, 1330)]
+        public void ReturnCount_OnGetCount_IfCountFlagValid(object[] args, int count)
+        {
+            FlagsProvider.GetCountForCountFlag(
+                args.Select(o=>o.ToString()).ToArray()
+                ).Should()
+                .Be(count);
         }
     }
 }
