@@ -69,15 +69,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DirSearchController.cs" />
     <Compile Include="FlagsProvider_Should.cs" />
     <Compile Include="Infrastructure\CDFCommand.cs" />
-    <Compile Include="Infrastructure\ConstrainedList.cs" />
     <Compile Include="FlagsProvider.cs" />
     <Compile Include="Infrastructure\ICommandShell.cs" />
+    <Compile Include="ISearchController.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="SearchRuleProvider.cs" />
-    <Compile Include="Tests\ConstrainedCollection_Should.cs" />
-    <Compile Include="Infrastructure\IConstraintedCollection.cs" />
     <Compile Include="PathFinder.cs" />
     <Compile Include="Tests\ChangeDirFinder_Should.cs" />
     <Compile Include="Program.cs" />
@@ -90,7 +89,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Concepts\ComLineFinder_Should_Plan.txt" />
-    <Content Include="Concepts\ConstrainedCollection_Should_Plan.txt" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
