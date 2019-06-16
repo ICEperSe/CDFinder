@@ -69,10 +69,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FlagsProvider_Should.cs" />
     <Compile Include="Infrastructure\CDFCommand.cs" />
     <Compile Include="Infrastructure\ConstrainedList.cs" />
     <Compile Include="FlagsProvider.cs" />
     <Compile Include="Infrastructure\ICommandShell.cs" />
+    <Compile Include="Options.cs" />
+    <Compile Include="SearchRuleProvider.cs" />
     <Compile Include="Tests\ConstrainedCollection_Should.cs" />
     <Compile Include="Infrastructure\IConstraintedCollection.cs" />
     <Compile Include="PathFinder.cs" />

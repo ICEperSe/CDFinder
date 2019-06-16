@@ -36,6 +36,7 @@ namespace ComLineCDWithFinder
                 else 
                     currentDirectory = new DirectoryInfo(Path.GetPathRoot(targetDir));
             }
+
             return FindDirectories(currentDirectory, GetSearchRule(targetDir))
                     .Select(d => d.FullName)
                     .ToArray();
@@ -62,20 +63,20 @@ namespace ComLineCDWithFinder
             return dirs;
         }
 
-        private static void GoThroughDirectories(DirectoryInfo parentDirectory, Action<DirectoryInfo> doOnDirectory)
+        private static void GoThroughSubDirs(DirectoryInfo parentDirectory, 
+                                                Func<DirectoryInfo, bool> doOnSubDirAndGoNext)
         {
-            var subDirs = parentDirectory.GetDirectories();
-            foreach (var subDir in subDirs)
+            try
             {
-                try
+                foreach (var subDir in parentDirectory.GetDirectories())
                 {
-                    doOnDirectory?.Invoke(subDir);
-                    GoThroughDirectories(subDir, doOnDirectory);
+                    if (doOnSubDirAndGoNext(subDir))
+                        GoThroughSubDirs(subDir, doOnSubDirAndGoNext);
                 }
-                catch
-                {
-                    // ignored
-                }
+            }
+            catch
+            {
+                // ignored
             }
         }
 
@@ -87,6 +88,10 @@ namespace ComLineCDWithFinder
 
         private static string ValidateSeparators(string path)
             => path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+
+
+
+
 
         private static Predicate<DirectoryInfo> GetSearchRule(string target)
         {

@@ -228,9 +228,9 @@ namespace ComLineCDWithFinder
         }
 
         //[Test]
-        public void NotThrowStackOverflowException_OnBigNesting()
-        {
+        //todo: public void NotThrowStackOverflowException_OnBigNesting()
+        //{
             
-        }
+        //}
     }
 }

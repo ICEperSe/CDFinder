@@ -25,11 +25,8 @@ Should:
 			-count=intNumb -> output intNumb paths
 			-all ->  output all paths
 			-s -> (default) output first path
-			-p -> put string: "cd " + resultPath in console
-			-g -> (default) find and change directory
 			-i -> (default) ignore case
 			-c -> case dependent search
-			-o -> find only in cur dir
 			-h -> help
 
 
