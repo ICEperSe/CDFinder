@@ -76,6 +76,7 @@
     <Compile Include="Infrastructure\ICommandShell.cs" />
     <Compile Include="ISearchController.cs" />
     <Compile Include="Options.cs" />
+    <Compile Include="SearchController_Should.cs" />
     <Compile Include="SearchRuleProvider.cs" />
     <Compile Include="PathFinder.cs" />
     <Compile Include="Tests\ChangeDirFinder_Should.cs" />

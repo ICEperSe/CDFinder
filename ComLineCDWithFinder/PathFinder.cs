@@ -9,37 +9,58 @@ namespace ComLineCDWithFinder
     internal static class PathFinder
     {
         public const string Asterisk = "*";
-        private static readonly char[] InvalidSymbols = {'%', '|', '<', '>', '$'};
+        private static readonly char[] InvalidSymbols = { '%', '|', '<', '>', '$' };
 
         private static readonly char[] Separators =
             {Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar};
 
-        public static string[] GetPath(DirectoryInfo curDir, string targetDir)
-        {
-            return GetPath(curDir.FullName, targetDir);
-        }
-
         public static string[] GetPath(string curDir, string targetDir)
         {
             targetDir = ValidateSeparators(targetDir);
-            if(!Directory.Exists(curDir))
+            if (!Directory.Exists(curDir))
                 throw new ArgumentException();
-            var currentDirectory = new DirectoryInfo(curDir);
+            var startDir = new DirectoryInfo(curDir);
             if (targetDir == string.Empty || targetDir.IndexOfAny(InvalidSymbols) != -1)
                 throw new ArgumentException(nameof(targetDir));
-            if (targetDir == currentDirectory.Name)
-                return new[] {currentDirectory.FullName};
+            if (targetDir == startDir.Name)
+                return new[] { startDir.FullName };
             if (Path.IsPathRooted(targetDir))
             {
-                if(Directory.Exists(targetDir))
-                    return new[] {targetDir};
-                else 
-                    currentDirectory = new DirectoryInfo(Path.GetPathRoot(targetDir));
+                if (Directory.Exists(targetDir))
+                    return new[] { targetDir };
+                else
+                    startDir = new DirectoryInfo(Path.GetPathRoot(targetDir));
             }
 
-            return FindDirectories(currentDirectory, GetSearchRule(targetDir))
+            return FindDirectories(startDir, GetSearchRule(targetDir))
                     .Select(d => d.FullName)
                     .ToArray();
+        }
+
+        public static string[] GetPaths(string curDir, string targetDir, bool ignoreCase, int count)
+        {
+            targetDir = ValidateSeparators(targetDir);
+            if (!Directory.Exists(curDir))
+                throw new ArgumentException();
+            if (targetDir == string.Empty || targetDir.IndexOfAny(InvalidSymbols) != -1)
+                throw new ArgumentException(nameof(targetDir));
+
+            var startDir = new DirectoryInfo(curDir);
+            if (targetDir == startDir.Name)
+                return new[] { startDir.FullName };
+            if (Path.IsPathRooted(targetDir))
+            {
+                if (Directory.Exists(targetDir))
+                    return new[] { targetDir };
+                else
+                    startDir = new DirectoryInfo(Path.GetPathRoot(targetDir));
+            }
+
+            var controller = new DirSearchController(
+                DirectorySearchRuleProvider.GetRule(targetDir, ignoreCase), count);
+
+            GoThroughSubDirs(startDir, controller);
+            return controller.FoundedItems.Select(d=>d.FullName).ToArray();
         }
 
         private static IEnumerable<DirectoryInfo> FindDirectories
@@ -48,7 +69,7 @@ namespace ComLineCDWithFinder
             var dirs = new List<DirectoryInfo>();
             foreach (var subDir in parent.GetDirectories())
             {
-                if(rule(subDir))
+                if (rule(subDir))
                     dirs.Add(subDir);
                 try
                 {
@@ -63,15 +84,16 @@ namespace ComLineCDWithFinder
             return dirs;
         }
 
-        private static void GoThroughSubDirs(DirectoryInfo parentDirectory, 
-                                                Func<DirectoryInfo, bool> doOnSubDirAndGoNext)
+        private static void GoThroughSubDirs(DirectoryInfo parentDirectory,
+                                                ISearchController<DirectoryInfo> controller)
         {
             try
             {
                 foreach (var subDir in parentDirectory.GetDirectories())
                 {
-                    if (doOnSubDirAndGoNext(subDir))
-                        GoThroughSubDirs(subDir, doOnSubDirAndGoNext);
+                    controller.GetItem(subDir);
+                    if (!controller.IsEnd)
+                        GoThroughSubDirs(subDir, controller);
                 }
             }
             catch
@@ -80,11 +102,7 @@ namespace ComLineCDWithFinder
             }
         }
 
-        private static string GetDirectoryName(string path)
-        {
-            var index = path.LastIndexOfAny(Separators);
-            return index == -1 ? path : path.Substring(index + 1);
-        }
+
 
         private static string ValidateSeparators(string path)
             => path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
@@ -95,22 +113,22 @@ namespace ComLineCDWithFinder
 
         private static Predicate<DirectoryInfo> GetSearchRule(string target)
         {
-            if(!target.Contains(Asterisk))
+            if (!target.Contains(Asterisk))
             {
                 if (target.IndexOfAny(Separators) == -1)
                     return GetRule_ForSimpleName(target);
                 else
                     return GetRule_ForPathPart(target);
             }
-            
+
             return GetRule_ForAsterisk(target);
         }
 
         private static Predicate<DirectoryInfo> GetRule_ForAsterisk(string target)
         {
-            if(!Path.IsPathRooted(target))
+            if (!Path.IsPathRooted(target))
                 target = Path.DirectorySeparatorChar + target;
-            target = Regex.Escape(target).Replace("\\" + Asterisk,"[^/\\\\]" + Asterisk);
+            target = Regex.Escape(target).Replace("\\" + Asterisk, "[^/\\\\]" + Asterisk);
             var regex = new Regex("." + Asterisk + target + "$");
             return d => regex.IsMatch(d.FullName);
         }
@@ -124,6 +142,12 @@ namespace ComLineCDWithFinder
         {
             var name = GetDirectoryName(target);
             return d => d.FullName.EndsWith(target) && d.Name == name;
+        }
+
+        private static string GetDirectoryName(string path)
+        {
+            var index = path.LastIndexOfAny(Separators);
+            return index == -1 ? path : path.Substring(index + 1);
         }
     }
 }
